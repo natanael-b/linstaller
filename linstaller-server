@@ -31,13 +31,15 @@ function install_on_mbr() {
   }
  
   log "Setting up language..."
-  # TODO
+  echo "LANG=${language}.UTF-8"   >  /target/etc/default/locale
+  echo "LC_ALL=${language}.UTF-8" >> /target/etc/default/locale
   
   log "Setting up keyboard..."
-  # TODO
+  echo "KEYMAP=${keyboard_map}" > /target/etc/vconsole.conf
  
   log "Setting up timezone..."
-  # TODO
+  ln -sf "/usr/share/zoneinfo/${timezone}" /target/etc/localtime
+  echo "${timezone}" > /target/etc/timezone
  
   log "Setting up hostname..."
   echo "${hostname}" > /target/etc/hostname
