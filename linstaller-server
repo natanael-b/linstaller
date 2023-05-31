@@ -1,5 +1,9 @@
 #!/bin/bash
  
+function log() {
+  echo "${1}" > "${message_file}"
+}
+ 
 function install_on_mbr() {
   log "Mounting /target..."
   mkdir -p "/target"
@@ -50,7 +54,9 @@ function install_on_mbr() {
   echo -e "${user_password}\n${user_password}" | chroot /target passwd "${user_name}"
  
   log "Running post install"
-  chroot /target /usr/bin/post-install
+  [ -f "/target/usr/bin/post-install" ] && {
+    chroot /target /usr/bin/post-install
+  }
  
   log "Install finished"
 }
