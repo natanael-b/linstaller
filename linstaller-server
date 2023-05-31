@@ -1,0 +1,66 @@
+#!/bin/bash
+ 
+function install_on_mbr() {
+  log "Mounting /target..."
+  mkdir -p "/target"
+  mount -o rw "${target_partition}" /target || {
+    log "Fail when trying to mount ${target_partition} in read-write mode in /target"
+    exit 1
+  }
+ 
+  log "Extracting the system..."
+  [ -z "${unsquashfs}" ] && {
+    unsquashfs -f -d /target "${squashfs_file}" || {
+      log "Fail when extracting ${squashfs_file} to /target"
+      exit 2
+    }
+  }
+ 
+  log "Installing GRUB"
+  mount -o bind /proc /target/proc
+  mount -o bind /sys  /target/sys
+  mount -o bind /dev  /target/dev
+  mkdir -p /target/tmp
+  chroot /target grub-install --force "${target_disk}" || {
+      log "Fail when installing GRUB on ${target_partition}"
+      exit 3
+  }
+  chroot /target update-grub || {
+      log "Fail when updating GRUB on ${target_partition}"
+      exit 4
+  }
+ 
+  log "Setting up language..."
+  # TODO
+  
+  log "Setting up keyboard..."
+  # TODO
+ 
+  log "Setting up timezone..."
+  # TODO
+ 
+  log "Setting up hostname..."
+  echo "${hostname}" > /target/etc/hostname
+ 
+  log "Setting up user..."
+  chroot /target useradd -m -s /bin/bash "${user_name}"
+  chroot /target usermod -aG sudo "${user_name}"
+  echo -e "${user_password}\n${user_password}" | chroot /target passwd "${user_name}"
+ 
+  log "Running post install"
+  chroot /target /usr/bin/post-install
+ 
+  log "Install finished"
+}
+
+function install_on_uefi() {
+  echo "Not implemented yet"
+  exit 1
+}
+
+if [ -d "/sys/firmware/efi" ]; then
+  install_on_uefi
+else
+  install_on_mbr
+fi
+
