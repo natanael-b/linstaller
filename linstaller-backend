@@ -114,14 +114,15 @@ for arg in "${@}"; do
   fi
 done
 
-[ -z "${target_partition}" ] && { echo "Missing target partition"; exit 42; }
-[ -z "${language}" ]         && { echo "Missing language";         exit 42; }
-[ -z "${user_name}" ]        && { echo "Missing user name";        exit 42; }
-[ -z "${user_password}" ]    && { echo "Missing password";         exit 42; }
-[ -z "${hostname}" ]         && { echo "Missing hostname";         exit 42; }
-[ -z "${timezone}" ]         && { echo "Missing time zone";        exit 42; }
-[ -z "${keyboard_map}" ]     && { echo "Missing keyboard map";     exit 42; }
-[ -z "${keyboard_map}" ]     && { echo "Missing keyboard map";     exit 42; }
+[ -z "${target_partition}" ] && { echo "Missing target partition";  exit 42; }
+[ -z "${language}" ]         && { echo "Missing language";          exit 42; }
+[ -z "${user_name}" ]        && { echo "Missing user name";         exit 42; }
+[ -z "${user_password}" ]    && { echo "Missing password";          exit 42; }
+[ -z "${squashfs_file}" ]    && { echo "Missing system image file"; exit 42; }
+[ -z "${hostname}" ]         && { echo "Missing hostname";          exit 42; }
+[ -z "${timezone}" ]         && { echo "Missing time zone";         exit 42; }
+[ -z "${keyboard_map}" ]     && { echo "Missing keyboard map";      exit 42; }
+[ -z "${keyboard_map}" ]     && { echo "Missing keyboard map";      exit 42; }
 
 if [ -d "/sys/firmware/efi" ]; then
   install_on_uefi
