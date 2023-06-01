@@ -13,6 +13,7 @@ function install_on_mbr() {
   }
   
   test -b /${home_partition} && {
+    log "Mounting /target/home..."
     rm -rf "/target/home"
     mkdir -p "/target/home"
     mount -o rw "${home_partition}" /target/home || {
