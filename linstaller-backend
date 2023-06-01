@@ -23,7 +23,7 @@ function install_on_mbr() {
   }
  
   log "Extracting the system..."
-  [ -z "${unsquashfs}" ] && {
+  [ ! -z "${squashfs_file}" ] && {
     unsquashfs -f -d /target "${squashfs_file}" || {
       log "Fail when extracting ${squashfs_file} to /target"
       exit 3
@@ -86,9 +86,45 @@ function install_on_uefi() {
   exit 1
 }
 
+for arg in "${@}"; do
+  if echo "${arg}" | grep -q "^--target-partition="; then
+    target_partition=$(echo "${arg}" | sed 's|^--target-partition=||')
+    shift
+  elif echo "${arg}" | grep -q "^--language="; then
+    language=$(echo "${arg}" | sed 's|^--language=||')
+    shift
+  elif echo "${arg}" | grep -q "^--user-name="; then
+    user_name=$(echo "${arg}" | sed 's|^--user-name=||')
+    shift
+  elif echo "${arg}" | grep -q "^--user-password="; then
+    user_password=$(echo "${arg}" | sed 's|^--user-password=||')
+    shift
+  elif echo "${arg}" | grep -q "^--squashfs="; then
+    squashfs_file=$(echo "${arg}" | sed 's|^--squashfs=||')
+    shift
+  elif echo "${arg}" | grep -q "^--hostname="; then
+    hostname=$(echo "${arg}" | sed 's|^--hostname=||')
+    shift
+  elif echo "${arg}" | grep -q "^--timezone="; then
+    timezone=$(echo "${arg}" | sed 's|^--timezone=||')
+    shift
+  elif echo "${arg}" | grep -q "^--keyboard-map="; then
+    keyboard_map=$(echo "${arg}" | sed 's|^--keyboard-map=||')
+    shift
+  fi
+done
+
+[ -z "${target_partition}" ] && { echo "Missing target partition"; exit 42; }
+[ -z "${language}" ]         && { echo "Missing language";         exit 42; }
+[ -z "${user_name}" ]        && { echo "Missing user name";        exit 42; }
+[ -z "${user_password}" ]    && { echo "Missing password";         exit 42; }
+[ -z "${hostname}" ]         && { echo "Missing hostname";         exit 42; }
+[ -z "${timezone}" ]         && { echo "Missing time zone";        exit 42; }
+[ -z "${keyboard_map}" ]     && { echo "Missing keyboard map";     exit 42; }
+[ -z "${keyboard_map}" ]     && { echo "Missing keyboard map";     exit 42; }
+
 if [ -d "/sys/firmware/efi" ]; then
   install_on_uefi
 else
   install_on_mbr
 fi
-
