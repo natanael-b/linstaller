@@ -11,14 +11,27 @@ function install_on_mbr() {
     log "Fail when trying to mount ${target_partition} in read-write mode in /target"
     exit 1
   }
+  
+  test -b /${home_partition} && {
+    rm -rf "/target/home"
+    mkdir -p "/target/home"
+    mount -o rw "${home_partition}" /target/home || {
+      log "Fail when trying to mount ${home_partition} in read-write mode in /target/home"
+      exit 2
+    }
+  }
  
   log "Extracting the system..."
   [ -z "${unsquashfs}" ] && {
     unsquashfs -f -d /target "${squashfs_file}" || {
       log "Fail when extracting ${squashfs_file} to /target"
-      exit 2
+      exit 3
     }
   }
+  
+  log "Generating fstab"
+  mount | grep "${target_partition}" | sed 's| on /target | / |;s|type ||; s|(.*| rw 0 1|'          > /target/etc/fstab
+  mount | grep "${home_partition}"   | sed 's| on /target/home | /home |;s|type ||; s|(.*| rw 0 1|' >> /target/etc/fstab
  
   log "Installing GRUB"
   mount -o bind /proc /target/proc
@@ -27,11 +40,11 @@ function install_on_mbr() {
   mkdir -p /target/tmp
   chroot /target grub-install --force "${target_disk}" || {
       log "Fail when installing GRUB on ${target_partition}"
-      exit 3
+      exit 4
   }
   chroot /target update-grub || {
       log "Fail when updating GRUB on ${target_partition}"
-      exit 4
+      exit 5
   }
  
   log "Setting up language..."
@@ -57,8 +70,14 @@ function install_on_mbr() {
   [ -f "/target/usr/bin/post-install" ] && {
     chroot /target /usr/bin/post-install
   }
- 
+  
+  umount -l /target/proc
+  umount -l /target/sys
+  umount -l /target/dev
+  
   log "Install finished"
+  
+  exit 0
 }
 
 function install_on_uefi() {
