@@ -4,7 +4,7 @@ function log() {
   echo "${1}" > "${message_file}"
 }
  
-function install_on_mbr() {
+function install_system() {
   log "Mounting /target..."
   mkdir -p "/target"
   mount -o rw "${target_partition}" /target || {
@@ -69,7 +69,7 @@ function install_on_mbr() {
  
   log "Running post install"
   [ -f "/target/usr/bin/post-install" ] && {
-    chroot /target /usr/bin/post-install
+    chroot /target /usr/bin/post-install ${@}
   }
   
   umount -l /target/proc
@@ -79,11 +79,6 @@ function install_on_mbr() {
   log "Install finished"
   
   exit 0
-}
-
-function install_on_uefi() {
-  echo "Not implemented yet"
-  exit 1
 }
 
 for arg in "${@}"; do
@@ -111,10 +106,14 @@ for arg in "${@}"; do
   elif echo "${arg}" | grep -q "^--keyboard-map="; then
     keyboard_map=$(echo "${arg}" | sed 's|^--keyboard-map=||')
     shift
+  elif echo "${arg}" | grep -q "^--target-disk="; then
+    target_disk=$(echo "${arg}" | sed 's|^--target-disk=||')
+    shift
   fi
 done
 
 [ -z "${target_partition}" ] && { echo "Missing target partition";  exit 42; }
+[ -z "${target_disk}" ]      && { echo "Missing GRUB target disk";  exit 42; }
 [ -z "${language}" ]         && { echo "Missing language";          exit 42; }
 [ -z "${user_name}" ]        && { echo "Missing user name";         exit 42; }
 [ -z "${user_password}" ]    && { echo "Missing password";          exit 42; }
@@ -122,10 +121,5 @@ done
 [ -z "${hostname}" ]         && { echo "Missing hostname";          exit 42; }
 [ -z "${timezone}" ]         && { echo "Missing time zone";         exit 42; }
 [ -z "${keyboard_map}" ]     && { echo "Missing keyboard map";      exit 42; }
-[ -z "${keyboard_map}" ]     && { echo "Missing keyboard map";      exit 42; }
 
-if [ -d "/sys/firmware/efi" ]; then
-  install_on_uefi
-else
-  install_on_mbr
-fi
+install_system ${@}
