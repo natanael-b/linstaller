@@ -39,10 +39,17 @@ function install_system() {
   mount -o bind /sys  /target/sys
   mount -o bind /dev  /target/dev
   mkdir -p /target/tmp
-  chroot /target grub-install --force "${target_disk}" || {
+  
+  if [ -d "/sys/firmware/efi" ]; then
+    echo "Not yet implemented"
+    exit 99
+  else
+    chroot /target grub-install --force "${target_disk}" || {
       log "Fail when installing GRUB on ${target_partition}"
       exit 4
-  }
+    }
+  fi
+  
   chroot /target update-grub || {
       log "Fail when updating GRUB on ${target_partition}"
       exit 5
