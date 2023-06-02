@@ -25,7 +25,7 @@ function install_system() {
   }
  
   log "Extracting the system..."
-  [ ! -z "${squashfs_file}" ] && {
+  [ -n "${squashfs_file}" ] && {
     unsquashfs -f -d /target "${squashfs_file}" || {
       log "Fail when extracting ${squashfs_file} to /target"
       exit 3
@@ -82,7 +82,7 @@ function install_system() {
  
   log "Running post install"
   [ -f "/target/usr/bin/post-install" ] && {
-    chroot /target /usr/bin/post-install ${@}
+    chroot /target /usr/bin/post-install "${@}"
   }
 
   log "Install finished"
@@ -112,8 +112,8 @@ for arg in "${@}"; do
   if echo "${arg}" | grep -q "^--target-partition="; then
     target_partition=$(echo "${arg}" | sed 's|^--target-partition=||')
     shift
-  elif echo "${arg}" | grep -q "^--language="; then
-    language=$(echo "${arg}" | sed 's|^--language=||')
+  elif echo "${arg}" | grep -q "^--home-partition="; then
+    home_partition=$(echo "${arg}" | sed 's|^--home-partition=||')
     shift
   elif echo "${arg}" | grep -q "^--user-name="; then
     user_name=$(echo "${arg}" | sed 's|^--user-name=||')
@@ -139,6 +139,9 @@ for arg in "${@}"; do
   elif echo "${arg}" | grep -q "^--efi-partition="; then
     efi_partition=$(echo "${arg}" | sed 's|^--efi-partition=||')
     shift
+  elif echo "${arg}" | grep -q "^--language="; then
+    language=$(echo "${arg}" | sed 's|^--language=||')
+    shift
   fi
 done
 
@@ -157,4 +160,4 @@ done
 [ -z "${timezone}" ]         && { echo "Missing time zone";         exit 42; }
 [ -z "${keyboard_map}" ]     && { echo "Missing keyboard map";      exit 42; }
 
-install_system ${@}
+install_system "${@}"
