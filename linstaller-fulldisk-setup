@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+# A quick and dirty script to a full disk setup this
+# script uses gdisk to create a GPT disk table and
+# create all basic partitions
+#
+
+# Create the GPT Partition table
+
+echo -e "
+o
+y
+w
+y
+" | gdisk "${1}"
+
+# Create the EFI Partition
+
+echo -e "
+n
+
+
++512M
+EF00
+w
+y
+" | gdisk "${1}"
+
+
+# Create the EXT4 Partition
+
+echo -e "
+n
+
+
++512M
+EF00
+w
+y
+" | gdisk "${1}"
+
+mkfs.fat  -F32 "${1}1"
+mkfs.ext4 "${1}2"
