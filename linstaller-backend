@@ -41,8 +41,12 @@ function install_system() {
   mkdir -p /target/tmp
   
   if [ -d "/sys/firmware/efi" ]; then
-    echo "Not yet implemented"
-    exit 99
+    mkdir -p /target/efi
+    mount -o rw "${efi_partition}" /target/efi
+    chroot /target grub-install --force --removable --efi-directory=/efi --bootloader-id=GRUB "${target_disk}" || {
+      log "Fail when installing GRUB on ${target_partition}"
+      exit 4
+    }
   else
     chroot /target grub-install --force "${target_disk}" || {
       log "Fail when installing GRUB on ${target_partition}"
@@ -116,11 +120,19 @@ for arg in "${@}"; do
   elif echo "${arg}" | grep -q "^--target-disk="; then
     target_disk=$(echo "${arg}" | sed 's|^--target-disk=||')
     shift
+  elif echo "${arg}" | grep -q "^--efi-partition="; then
+    efi_partition=$(echo "${arg}" | sed 's|^--efi-partition=||')
+    shift
   fi
 done
 
 [ -z "${target_partition}" ] && { echo "Missing target partition";  exit 42; }
 [ -z "${target_disk}" ]      && { echo "Missing GRUB target disk";  exit 42; }
+
+[ -d "/sys/firmware/efi" ] && {
+  [ -z "${efi_partition}" ]  && { echo "Missing GRUB target disk";  exit 42; }
+}
+
 [ -z "${language}" ]         && { echo "Missing language";          exit 42; }
 [ -z "${user_name}" ]        && { echo "Missing user name";         exit 42; }
 [ -z "${user_password}" ]    && { echo "Missing password";          exit 42; }
