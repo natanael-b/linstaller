@@ -60,6 +60,15 @@ function install_system() {
       log "Fail when updating GRUB on ${target_partition}"
       exit 5
   }
+  
+  # HOTFIX: update-grub taking wrong UUID of root partition
+  (
+    cd /target/boot/grub
+    wrong_uuid=$(grep -om1 "root=UUID=.*" "grub.cfg" | cut -d ' ' -f1 | cut -d '=' -f3)
+    correct_uuid=$(blkid -o value -s UUID "${target_partition}")
+    
+    sed -i "s|${wrong_uuid}|${correct_uuid}|g" "grub.cfg"
+  )
  
   log "Setting up language..."
   echo "LANG=${language}.UTF-8"   >  /target/etc/default/locale
