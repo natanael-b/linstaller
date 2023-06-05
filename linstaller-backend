@@ -73,7 +73,7 @@ function install_system() {
     
     sed -i "s|${wrong_uuid}|${correct_uuid}|g" "grub.cfg"
     
-    install_grub
+    install_grub > /dev/null 2>&1
   #)
  
   log "Setting up language..."
