@@ -7,6 +7,15 @@
 
 # Create the GPT Partition table
 
+filesystem="ext4"
+
+if echo "${1}" | grep -q "^--filesystem="; then
+  filesystem=$(echo "${arg}" | sed 's|^--filesystem=||')
+  [ ! -f "/usr/sbin/mkfs.${1}" ] && {
+    filesystem="ext4"
+  }
+fi
+
 echo -e "
 o
 y
@@ -26,7 +35,6 @@ w
 y
 " | gdisk "${1}"
 
-
 # Create the EXT4 Partition
 
 echo -e "
@@ -40,4 +48,4 @@ y
 " | gdisk "${1}"
 
 echo y | mkfs.fat  -F32 "${1}1"
-echo y | mkfs.ext4 "${1}2"
+echo y | mkfs.${filesystem} "${1}2"
