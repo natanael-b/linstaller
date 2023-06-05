@@ -4,7 +4,7 @@
 
 HERE="$(dirname "$(readlink -f "${0}")")"
  
-bash "${HERE}/linstaller-fulldisk-setup"          #
+bash "${HERE}/linstaller-fulldisk-setup" /dev/sda #
 bash "${HERE}/linstaller-backend"                 \
   --target-partition=/dev/sda2                    \
   --efi-partition=/dev/sda1                       \
