@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Auto configure an installation for casper based systems (e.g. Ubuntu, Debian...)
+
+HERE="$(dirname "$(readlink -f "${0}")")"
+ 
+bash "${HERE}/linstaller-fulldisk-setup"          #
+bash "${HERE}/linstaller-backend"                 \
+  --target-partition=/dev/sda2                    \
+  --efi-partition=/dev/sda1                       \
+  --user-name="user"                              \
+  --user-password="123"                           \
+  --squashfs="/cdrom/casper/filesystem.squashfs"  \
+  --hostname="vm"                                 \
+  --timezone="America/Sao_Paulo"                  \
+  --keyboard-map="br_abnt2"                       \
+  --target-disk=/dev/sda                          \
+  --language=pt_BR                                #
