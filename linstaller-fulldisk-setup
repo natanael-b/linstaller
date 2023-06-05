@@ -14,6 +14,7 @@ if echo "${1}" | grep -q "^--filesystem="; then
   [ ! -f "/usr/sbin/mkfs.${1}" ] && {
     filesystem="ext4"
   }
+  shift
 fi
 
 echo -e "
