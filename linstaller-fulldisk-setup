@@ -33,8 +33,8 @@ echo -e "
 n
 
 
-+512M
-EF00
+
+
 w
 y
 " | gdisk "${1}"
