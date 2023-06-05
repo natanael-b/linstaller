@@ -40,4 +40,4 @@ y
 " | gdisk "${1}"
 
 mkfs.fat  -F32 "${1}1"
-mkfs.ext4 "${1}2"
+mkfs.ext4 "${1}2" -y
