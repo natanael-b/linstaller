@@ -29,6 +29,8 @@ function install_grub() {
  
 function install_system() {
   log "Mounting /target..."
+  umount -l /target > /dev/null 2>&1
+
   mkdir -p "/target"
   mount -o rw "${target_partition}" /target || {
     log "Fail when trying to mount ${target_partition} in read-write mode in /target"
