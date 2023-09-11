@@ -61,7 +61,7 @@ The script supports various arguments that specify installation settings. Here a
 > **Notes:**
 > * `*` Mandatory
 > * `**` Mandatory if the system is booted in UEFI mode.
-> * `**` See [linstaller-example](linstaller-example) for usage example
+> * See [linstaller-example](linstaller-example) for usage example
 
 ## How does it work?
 The script performs the following steps during installation:
