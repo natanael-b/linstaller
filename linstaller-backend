@@ -14,6 +14,8 @@ function install_grub() {
       log "Fail when installing GRUB on ${target_partition}"
       exit 4
     }
+    # Fallback for some VMs
+    grub-install --force --bootloader-id=GRUB --boot-directory=/target/boot/ --efi-directory=/target/efi
   else
     chroot /target grub-install --force "${target_disk}" || {
       log "Fail when installing GRUB on ${target_partition}"
