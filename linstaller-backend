@@ -1,5 +1,7 @@
 #!/bin/bash
- 
+
+DONT_UMOUNT=false
+
 [ -z "${MESSAGE_FILE}" ] && MESSAGE_FILE="/dev/stderr"
  
 function log() {
@@ -110,6 +112,8 @@ function install_system() {
 }
 
 function cleanup(){
+  [ "${DONT_UMOUNT}" = "true" ] && return ;
+
   umount -l /target/proc
   umount -l /target/sys
   umount -l /target/dev
@@ -160,6 +164,9 @@ for arg in "${@}"; do
     shift
   elif echo "${arg}" | grep -q "^--language="; then
     language=$(echo "${arg}" | sed 's|^--language=||')
+    shift
+  elif echo "${arg} | grep -q "^--skip-umount$"; then
+    DONT_UMOUNT=true
     shift
   fi
 done
