@@ -165,7 +165,7 @@ for arg in "${@}"; do
   elif echo "${arg}" | grep -q "^--language="; then
     language=$(echo "${arg}" | sed 's|^--language=||')
     shift
-  elif echo "${arg} | grep -q "^--skip-umount$"; then
+  elif echo "${arg}" | grep -q "^--skip-umount$"; then
     DONT_UMOUNT=true
     shift
   fi
