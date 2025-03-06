@@ -3,9 +3,10 @@
 DONT_UMOUNT=false
 
 [ -z "${MESSAGE_FILE}" ] && MESSAGE_FILE="/dev/stderr"
- 
+echo -n >"${MESSAGE_FILE}"
+
 function log() {
-  echo "${1}" > "${MESSAGE_FILE}"
+  echo "${1}" >> "${MESSAGE_FILE}"
 }
 
 function install_grub() {
@@ -32,9 +33,15 @@ function install_grub() {
 }
  
 function install_system() {
-  log "Mounting /target..."
+  log "Ensuring partitions are unmounted before installation..."
+  umount -l "${efi_partition}"    >> "${MESSAGE_FILE}" 2>&1
+  umount -l "${target_partition}" >> "${MESSAGE_FILE}" 2>&1
+  umount -l "${home_partition}"   >> "${MESSAGE_FILE}" 2>&1
+  umount -l "${target_disk}"      >> "${MESSAGE_FILE}" 2>&1
   umount -l /target > /dev/null 2>&1
+  umount -l /target/home > /dev/null 2>&1
 
+  log "Mounting /target..."
   mkdir -p "/target"
   mount -o rw "${target_partition}" /target || {
     log "Fail when trying to mount ${target_partition} in read-write mode in /target"
@@ -114,6 +121,7 @@ function install_system() {
 function cleanup(){
   [ "${DONT_UMOUNT}" = "true" ] && return ;
 
+  log "Cleaning up..."
   umount -l /target/proc
   umount -l /target/sys
   umount -l /target/dev
@@ -127,6 +135,10 @@ function cleanup(){
   [ -b "/${home_partition}" ] && {
     umount -l /target/home
   }
+
+  umount -l "${target_partition}" >> "${MESSAGE_FILE}" 2>&1
+  umount -l "${home_partition}"   >> "${MESSAGE_FILE}" 2>&1
+  umount -l "${efi_partition}"    >> "${MESSAGE_FILE}" 2>&1
 }
 
 trap cleanup EXIT
