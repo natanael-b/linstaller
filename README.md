@@ -1,25 +1,24 @@
 # linstaller
-A minimalistic universal easy-to-implement linux installer
+A minimalistic, universal, easy-to-implement Linux installer
 
 ## Why?
 
-Current Linux installers ended up absorbing out-of-scope functions, which made them complex and difficult to debug, they also eventually adopted the logic of formatting, extracting the image, configuring and only then installing the boot loader, meanwhile allows a reliable installation, this can result in an incomplete installation if for some reason some configuration such as generating locales, or cleaning the package manager fails, this results in an unbootable system, `linstaller` tries to maintain reliability however focusing on providing an bootable system instead of a pre-configured one, with the exception of the user and the hostname, all configurations are done by a post-installation script, ensuring that the system in minimal conditions can boot after installation
+Current Linux installers have absorbed out-of-scope functions, making them complex and difficult to debug. They also eventually adopted the logic of formatting, extracting the image, configuring, and only then installing the bootloader. While this allows for a reliable installation, it can result in an incomplete installation if certain configurations—such as generating locales or cleaning the package manager—fail. This can lead to an unbootable system. `linstaller` aims to maintain reliability while focusing on providing a bootable system rather than a pre-configured one. With the exception of the user and hostname, all configurations are handled by a post-installation script. This ensures that the system, in minimal conditions, can boot after installation.
 
-## `linstaller` setup
+## `linstaller` Setup
 
-Configura `linstaller` é incrivelmente simples:
-
-- [`linstaller-backend`](https://raw.githubusercontent.com/natanael-b/linstaller/main/linstaller-backend)is the installer, put it in the image
-  - And these are the dependencies:
+Configuring `linstaller` is incredibly simple:
+- [`linstaller-backend`](https://raw.githubusercontent.com/natanael-b/linstaller/main/linstaller-backend) is the installer—place it in the image
+  - These are its dependencies:
     - `grub-install`
     - `grub-pc`
     - `grub-efi`
-- [`linstaller-fulldisk-setup`](https://raw.githubusercontent.com/natanael-b/linstaller/main/linstaller-fulldisk-setup)  is the formatter, it is the simplest way to configure a blank disk
-  - And these are the dependencies:
+- [`linstaller-fulldisk-setup`](https://raw.githubusercontent.com/natanael-b/linstaller/main/linstaller-fulldisk-setup)  is the formatter, providing the simplest way to configure a blank disk.
+  - These are its dependencies:
     - `gdisk`
     - `mkfs.fat`
 
-On a Ubuntu/Debian based system this install everything you need:
+On a Ubuntu/Debian-based system, install everything you need with:
 
 ```bash
 sudo apt install gdisk                  \
@@ -27,24 +26,24 @@ sudo apt install gdisk                  \
                  grub-common            \
                  grub-pc-bin grub-efi   \
                  grub-efi-amd64-signed  \
-                 dosfstools             # Run on image
+                 dosfstools             # For EFI partitions
 ```
 
 ## Disk setup
 
-You will need to setup a disk, `linstaller` don't do this but provide a utility to quick setup a full-disk installation, once time installed `linstaller` on `/usr/bin` you shold be able (as root) to:
+You will need to set up a disk. `linstaller` does not do this directly but provides a utility for quickly setting up a full-disk installation. Once linstaller is installed in /usr/bin, you should be able to run (as root):
 
 ```bash 
 linstaller-fulldisk-setup --filesystem=ext4 /dev/sda
 ```
 
-This will **erase all partitions and data** on `/dev/sda` create a 512M partition for EFI as FAT32 (even on MBR), create a 2nd partition with all remaining disk size and format as `ext4`
+This will **erase all partitions and data** on `/dev/sda` create a 512M partition for EFI as FAT32 (even on MBR), and create a second partition with the remaining disk space, formatting it as `ext4`
 
-> **Tip:** You can format system target partition with any of `mkfs` supported format, you can list the supported with `ls /usr/sbin | grep "mkfs\." | cut -d\. -f2`
+> **Tip:** You can format the system’s target partition using any `mkfs`-supported format. List supported formats with: `ls /usr/sbin | grep "mkfs\." | cut -d\. -f2`
 
 ## Usage
 
-The script supports various arguments that specify installation settings. Here are the supported arguments:
+The script supports various arguments to specify installation settings. Here are the supported arguments:
 
 * `--target-partition=<target_partition>`: Specifies the target partition where the system will be installed.`*`
 * `--home-partition=<home_partition>`: Specifies the user's home partition.
@@ -76,4 +75,4 @@ The script performs the following steps during installation:
 
 ## The post install
 
-Since `linstaller` is designed to install the system in the most fail-safe way possible, all configuration should be done through a post-installation script/software that should be located in the squashfs image at `/usr/bin/post-install`. Any arguments not supported by linstaller are passed to this script/software for further processing.
+Since `linstaller` is designed to install the system in the most fail-safe way possible, all configurations should be handled through a post-installation script or software located in the SquashFS image at `/usr/bin/post-install`. Any arguments not supported by `linstaller` are passed to this script/software for further processing.
