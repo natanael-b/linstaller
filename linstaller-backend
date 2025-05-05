@@ -14,20 +14,20 @@ function install_grub() {
     mkdir -p /target/efi
     mount -o rw "${efi_partition}" /target/efi
     chroot /target grub-install --force --removable --efi-directory=/efi --bootloader-id=GRUB "${target_disk}" || {
-      log "Fail when installing GRUB on ${target_partition}"
+      log "Fail when installing GRUB on ${target_partition} with EFI, exit code: ${?}"
       exit 4
     }
     # Fallback for some VMs
     grub-install --force --bootloader-id=GRUB --boot-directory=/target/boot/ --efi-directory=/target/efi
   else
     chroot /target grub-install --force "${target_disk}" || {
-      log "Fail when installing GRUB on ${target_partition}"
+      log "Fail when installing GRUB on ${target_partition} with Legacy BIOS, exit code: ${?}"
       exit 4
     }
   fi
   
   chroot /target update-grub || {
-      log "Fail when updating GRUB on ${target_partition}"
+      log "Fail when updating GRUB on ${target_partition}, exit code: ${?}"
       exit 5
   }
 }
@@ -44,7 +44,7 @@ function install_system() {
   log "Mounting /target..."
   mkdir -p "/target"
   mount -o rw "${target_partition}" /target || {
-    log "Fail when trying to mount ${target_partition} in read-write mode in /target"
+    log "Fail when trying to mount ${target_partition} in read-write mode in /target, exit code: ${?}"
     exit 1
   }
   
@@ -53,7 +53,7 @@ function install_system() {
     rm -rf "/target/home"
     mkdir -p "/target/home"
     mount -o rw "${home_partition}" /target/home || {
-      log "Fail when trying to mount ${home_partition} in read-write mode in /target/home"
+      log "Fail when trying to mount ${home_partition} in read-write mode in /target/home, exit code: ${?}"
       exit 2
     }
   }
@@ -61,7 +61,7 @@ function install_system() {
   log "Extracting the system..."
   [ -n "${squashfs_file}" ] && {
     unsquashfs -f -d /target "${squashfs_file}" || {
-      log "Fail when extracting ${squashfs_file} to /target"
+      log "Fail when extracting ${squashfs_file} to /target, exit code: ${?}"
       exit 3
     }
   }
