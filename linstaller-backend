@@ -75,7 +75,8 @@ function install_system() {
   mount -o bind /sys  /target/sys
   mount -o bind /dev  /target/dev
   mkdir -p /target/tmp
-  
+  chmod 1777 /target/tmp
+
   install_grub
   
   # HOTFIX: update-grub taking wrong UUID of root partition
@@ -197,5 +198,17 @@ done
 [ -z "${hostname}" ]         && { echo "Missing hostname";          exit 42; }
 [ -z "${timezone}" ]         && { echo "Missing time zone";         exit 42; }
 [ -z "${keyboard_map}" ]     && { echo "Missing keyboard map";      exit 42; }
+
+log "Setting up partition tables"
+partx -u  "/dev/$(lsblk -no PKNAME ${target_partition})"
+partprobe "/dev/$(lsblk -no PKNAME ${target_partition})"
+
+partx -u  "/dev/$(lsblk -no PKNAME ${efi_partition})"
+partprobe "/dev/$(lsblk -no PKNAME ${efi_partition})"
+
+[ -b "/${home_partition}" ] && {
+  partx -u  "/dev/$(lsblk -no PKNAME ${home_partition})"
+  partprobe "/dev/$(lsblk -no PKNAME ${home_partition})"
+}
 
 install_system "${@}"
